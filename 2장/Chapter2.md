@@ -83,5 +83,29 @@
   - 
 5. close()
   - 소켓의 사용을 마치기위한 함수 
-### TCP 클라이언트 예제 프로ㅓ그램
-- daytime 클라이언트
+### TCP 클라이언트 예제 프로그램 
+- daytime 클라이언트 : port 번호 13번
+  - casting의 이유 : struct sockaddr_in → struct sockaddr 로 형 변환해서 소켓 함수에 전달하는 것
+  - bzero : 어떤 포인터가 가리키는 구조체의 내용을 모두 0으로 변환
+    -초기화하지 않으면 구조체 내부에 쓰레기 값이 남아 있어서 connect() 등에서 예상치 못한 동작 오류가 발생할 수 있음
+- TCP 에코 클라이언트 : port 번호 7번
+  - 보안상 echo 기능을 하지않아 연결실패
+  - fget 함수 : 스트링 문자열을 입력받는 함수
+    - fgets(문자열저장버퍼, 버퍼의 크기, 입력스트림포인터)
+  - write함수
+  - read 함수
+
+
+# 2장에 대한 생각
+1. IP 주소 변환 4가지에 대해 각각 차이 알기
+  - gethostbyname()
+  - gethostbyaddr()
+  - inet_pton()
+  - inet_ntop()
+2. CASTING
+  - struct sockaddr_in → struct sockaddr 로 형 변환해서 소켓 함수에 전달하는 것
+  - bind, connect, accept 소켓함수들은 sockaddr만 인자로 받고있기때문에 sockaddr_in을 sockaddr로 캐스팅하는것!
+3. bzero =meeset
+  - sockaddr_in의 값들을 처음에 0으로 초기화하지않으면 쓰레값으로인해 소켓함수에서 예상치 못한 오류가 발
+3. PORT 지원 X
+  - daytime, echo 등 보안문제로 인해 OS가 막혀있다. 그래서 연결해 실패했다 =>
