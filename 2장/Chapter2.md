@@ -166,3 +166,4 @@
     - server : socket() bind() recvfrom() sendto()  client : socket() sendto() recvfrom()
 7. TCP는 연결을 먼저 확립하는 프로토콜이기때문에 connect할때 상대주소를 자동으로저장하기에 read/write할때 상대주소 알필요없음
 8. UDP는 비연결형 프로토콜이기에 sendto할때 상대주소가 필요하고, recvfrom할때 누가보냈는지를 알려줘야함
+9. 2단원은 소켓프로그래밍의 기초가 되기때문에 반복학습이 필요하고, 언제 어디서 어떤 인자가 들어가야하는지 외우면 좋을거같음
