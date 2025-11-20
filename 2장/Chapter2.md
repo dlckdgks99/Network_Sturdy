@@ -125,9 +125,23 @@
   - listen이 호출되어있다면 서버는 accept()를 호출하여 accept 큐에서 하나의 연결을 꺼내가면 그 때 클라이언트의 connect()함수가 리턴되고 송수신 가능해진다.
  
 ### TCP 에코 서버 프로그램
-
+- tcp_echoserv.c와 tcp_echocli.c 코드를 이용해 둘이 통신 가능
 # UDP 프로그램
+- type 인자로 SOCK_DGRAM을 지정
+- 비연결형 소켓이므로 connect()가 필요없음
+- 송수신할 때에는 각 데이터그램마다 목적지의 IP 주소와 포트번호를 항상 함수 인자로 주어야한다.
+- int sendto(int s, char* buf, int length, int flags, sockaddr* to, int tolen) = int sendto(소켓번호, 전송할 데이터가 저장된 버퍼, buf 버퍼의 크기, 보통 0, 목적지의 소켓주소 구조체, to 버퍼의 크기)
+- int recvfrom(int s, char* buf, int length, int flags, sockaddr* from, int* fromlen) = int recvfrom(소켓번호, 수신 데이터를 저장할 버퍼,buf 버퍼의 길이, 보통 0, 발신자의 소켓주소 구조체, from 버퍼의 길이)
+
 ### UDP 프로그램 작성 절차
+
+# Connected UDP
+- UDP 소켓을 통해서 통신할 상대방이 한 곳으로 고정되어 있다면 처리 속도를 향상시키기 위해 사용
+- connect() 함수를 추가로 호출해주면 된다
+  - connect()호출시 커널은 connect() 인자로 받은 상대방 소켓주소와 UPD소켓을 내부적으로 미리 연결
+  - sendto()에 의해 데이터를 전송하는 순가에 소켓과 커널이 내부적으로 연결되는데 Connected UDP는 이과정을 미리함으로 처리속도 향상
+- send(), write()사용
+- 3-way handshaking 하지않아 에러는 connect()가 아닌 read()나 recv()실행 시 발견
 #  🤔 2장에 대한 생각
 1. IP 주소 변환 4가지에 대해 각각 차이 알기
   - gethostbyname()
@@ -137,12 +151,17 @@
 2. CASTING
   - struct sockaddr_in → struct sockaddr 로 형 변환해서 소켓 함수에 전달하는 것
   - bind, connect, accept 소켓함수들은 sockaddr만 인자로 받고있기때문에 sockaddr_in을 sockaddr로 캐스팅하는것!
-3. bzero =meeset
+3. bzero =memset
   - sockaddr_in의 값들을 처음에 0으로 초기화하지않으면 쓰레값으로인해 소켓함수에서 예상치 못한 오류가 발
 3. PORT 지원 X
   - daytime, echo 등 보안문제로 인해 OS가 막혀있다. 그래서 연결해 실패했다 => 예전에는 자동으로 서버가 돌아갔지만 현재는 막혀있어 연결이 실패한다. 새로운 포트를 가진 서버를 구축해 연결을 해야한다
   - 2000년에는 echo, daytime 서버가 자동으로 돌고 있었고 지금은 서버가 꺼져 있으니 직접 서버를 만들어서 실행해야함
 4. servaddr.sin_addr.s_addr = htonl(INADDR_ANY) : 서버측에서 어떤 ip든 들어와라, 서버만사용
-5. inet_pton(AF_INET, "192.168.0.10", &servaddr.sin_addr) : 특정한 IP만 들어오고 연결, 서버 및 클라이언트 사
-
-
+5. inet_pton(AF_INET, "192.168.0.10", &servaddr.sin_addr) : 특정한 IP만 들어오고 연결, 서버 및 클라이언트 사용
+6. TCP vs UDP 코드차이
+  - TCP 
+    - server : socket() bind() listen() accept() read()/write() , client : socket() connect() write()/read()
+  - UDP
+    - server : socket() bind() recvfrom() sendto()  client : socket() sendto() recvfrom()
+7. TCP는 연결을 먼저 확립하는 프로토콜이기때문에 connect할때 상대주소를 자동으로저장하기에 read/write할때 상대주소 알필요없음
+8. UDP는 비연결형 프로토콜이기에 sendto할때 상대주소가 필요하고, recvfrom할때 누가보냈는지를 알려줘야함
