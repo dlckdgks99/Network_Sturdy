@@ -19,3 +19,6 @@
 | ----------- | ---------------------- |
 | 환경변수와 명령행 인자 영역 | *environ 내용 |
 | 스택(stack) | argc, argv, auto_var, reg_var, auto_ptr |
+| 힙(heap) | molloc()이 할당한 10 바이트 |
+|데이터 영역 | uninit_global_var,static_var, init_global_var=3 |
+| 코드 영역 | 어셈블리된 프로그램 코드 |
