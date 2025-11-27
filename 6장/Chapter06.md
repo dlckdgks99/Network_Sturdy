@@ -25,10 +25,56 @@
   - telnet, ftp와 같은 서비스 요청은 inetd가 그 서비스를 처리하기 위한 새로운 프로세스를 생성
   - 각 서비스를 구분하기 위해 포트번호 사용
  
+### Inetd 환경 설정 (Internet Service Daemon)
+-  $ /etc/services
+-  $ /etc/inetd.conf 
 
+### TCP Wrapper
+- 외부에서 telnet, ftp 등의 TCP/IP 응용 서비스를 이용하려고 할 때 서비스 제공 여부를 상대방 IP주소를 보고 제한하는 기능 제공
+- TCP Wrapper 기능은 tcpd 데몬이 제공
+- $/etc/hosts.deny
+- $/etc/hosts.allw
+
+# xinetd를 이용한 서버 구축
+### xinetd 환경 설정
+- $ /etc/xinetd.conf : xinetd가 지원하는 인터넷 서비스와 해당 포트 등을 정의
+- $ /etc/rc.d/init.d/xinetd : defaults 부분과 service 부분으로 나누어짐 
+  - defaults 부분 설정
+    - instances : 하나의 서비스에 대해 동시에 처리할 수 있는 최대 요청의수
+    - long_type : 프로그램에 의해 생성되는 로그의 형태를 어떤 식으로 나타낼 지
+    - log_on_success : 서버가 서비스를 시작할 때 어떤 정보가 로그에 남을 것인지를 정의
+    - only_from : 서비스를 이용할 수 있도록 허용하는 원격 호스트들을정의
+    - per_source : 특정 서비스별로 접속할 수 있는 최대 접속자 수를 설정
+    - enabled : xinetd에서 지원하는 서비스 이름을 설정
+  - service 부분 설정
+    - socket_type : 이 서비스가 사용할 소켓의 타입을 지정
+    - wait : 
+    - user : 
+    - type : 서비스의 유형을 정의
+    - id : 
+    - protocol : 
+    - only_from : 접근을 허용할 원격 주소 정의
+    - no_access : 접근을 차단할 원격 호스트 주소를 정의
+
+### xinetd를 이용한 에코 서버
+- 소켓 관련 함수 호출이 전혀없음
+- 그 이유는 에코 서비스를 위해 지정된 포트번호로 서비스 요청이 들어오면 xinetd가 accept()를 대신 호출하여 클라이언트와 연결하고 echoserv.c를 실행시켜주기에
+- xinetd가 클라이언트와 연결된 후 소켓으로의 입력 및 출력을 서버 응용 프로그램의 표준 입력 및 출력과 내부적으로 연결시켜줌
+- 응용프로그램에서 stdout으로 출력된 데이터는 클라이언트로 전송되며, 클라이언트로부터 수신된 데이터는 stdin으로 읽음
+- xinetd에 서비스를 등록하는 절차
+  - /etc/service 파일에 myecho_serv 서버를 등록
+  - /etc/xinetd.d/myecho_serv라는 서비스 파일을 만들어 xinetd와 관련된 환경을 설정
+  - xinetd 재시작
+    
+### UDP 에코 서버
 
 # 🤔6장에 대한 내 생각
 - sigaction 구조체 오류
   - #include <bits/sigaction.h>라이브러리에 있었음!!
 - 포트 열려있는지 확인 명령어
-  - sudo lsof -i :9901 
+  - sudo lsof -i :9901
+- 요즘에는 inetd를 안쓰기에 설치해줘야한다 : $sudo apt install openbsd-inetd
+- 증권사와 데몬 서버 구축이 어떤관계를 가지고 있을까?
+  - xinetd
+    - 보안 정책 때문에 xinetd 기반 서비스는 대부분 금지  
+    - 요청이 올 때마다 프로세스를 띄우는 모델은 너무 느리고 비효율적이라 사용하지 않는다고함
